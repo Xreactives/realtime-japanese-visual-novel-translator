@@ -1,0 +1,11 @@
+torch>=2.6.0
+transformers>=5.22.2
+accelerate>=1.15.0
+bitsandbytes>=0.50.2
+qwen-vl-utils>=0.0.14
+opencv-python>=5.0.0.93
+easyocr>=1.7.2
+pillow>=13.0.0
+ultralytics>=8.4.211
+numpy==2.5.4
+
