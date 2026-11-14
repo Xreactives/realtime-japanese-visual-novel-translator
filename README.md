@@ -29,29 +29,36 @@ Feedback-Loop-Proof Overlay: Uses Windows SetWindowDisplayAffinity(WDA_EXCLUDEFR
 ## Project Structure
 ```
 realtime-japanese-visual-novel-translator/
-├── runtime/                     # Lightweight PyTorch-free inference runtime
-│   ├── detector_onnx.py         # Full-screen YOLO detector (speaker, dialogue, choice)
-│   ├── ocr_onnx.py              # ONNX CRNN recognizer with aspect-preserving padding
-│   ├── postprocess.py           # Speaker extraction, bracket normalization & SudachiPy OOV check
-│   ├── translator_sugoi.py      # CTranslate2 Sugoi V4 wrapper with LRU translation cache
-│   └── device_utils.py          # Runtime CUDA/cuBLAS probing + graceful CPU INT8 fallback
-├── model/                       # CRNN model architecture, dataset loader & character vocabulary
-│   ├── crnn.py
-│   ├── dataset.py
-│   └── vocab.json
-├── pipeline/                    # End-to-end dataset curation & quality-control pipeline
-│   ├── 1_crop_lines.py          # Automated line extraction from raw VN captures
-│   ├── 2_deduplicate.py         # Perceptual hash deduplication
-│   ├── 3_prelabel.py            # Automated silver-label generation
-│   ├── 4_audit_gui.py           # Custom Tkinter GUI for rapid human label verification
-│   ├── 5_generate_trdg.py       # Synthetic Japanese text line generation across VN fonts
-│   └── 6_find_noisy_labels.py   # CTC loss / confidence-based noisy label mining
-├── realtime_translator.py       # Main real-time capture, debounce & overlay entry point
-├── train.py                     # CRNN training script
-├── export_onnx.py               # Exports PyTorch CRNN checkpoint -> weights/crnn_vn.onnx
-├── export_detector_onnx.py      # Exports YOLO detector -> weights/vn_detector.onnx
-├── download_sugoi.py            # Downloads & verifies Sugoi V4 CTranslate2 weights
-└── requirements.txt             # Minimal runtime dependencies
+├── assets/
+│   └── demo.gif                        # README live preview demo
+├── export/
+│   ├── export_detector_onnx.py         # Export YOLO detector (.pt) to ONNX
+│   └── export_recognizer_onnx.py       # Export CRNN recognizer (.pth) to ONNX
+├── model/
+│   ├── crnn.py                         # Custom CRNN + CTC network architecture
+│   ├── dataset.py                      # PyTorch Dataset, augmentations & CTC collation
+│   └── vocab.json                      # Character-to-index vocabulary mapping
+├── pipeline/
+│   ├── 1_crop_lines.py                 # Automated text-line cropping from screenshots
+│   ├── 2_deduplicate.py                # Perceptual hash deduplication
+│   ├── 3_prelabel.py                   # Silver-label generation
+│   ├── 4_audit_gui.py                  # Tkinter manual verification & correction GUI
+│   ├── 5_generate_trdg.py              # Synthetic Japanese font augmentation (TRDG)
+│   └── 6_find_noisy_labels.py          # CTC loss-based noisy-label mining
+├── runtime/
+│   ├── __init__.py
+│   ├── detector_onnx.py                # Full-screen (1280px) YOLO ONNX inference
+│   ├── device_utils.py                 # CUDA/cuBLAS probing & CPU INT8 fallback
+│   ├── ocr_onnx.py                     # Batch CRNN ONNX inference & CTC decoding
+│   ├── postprocess.py                  # SudachiPy & regex Japanese text normalization
+│   └── translator_sugoi.py             # Sugoi V4 (CTranslate2) offline translator
+├── weights/
+│   └── .gitkeep                        # Place vn_detector.onnx & crnn_vn.onnx here
+├── download_sugoi.py                   # Fetch Sugoi V4 CTranslate2 translation model
+├── realtime_translator.py              # Main live screen-capture & translation overlay
+├── requirements.txt                    # Lightweight runtime inference dependencies
+├── requirements-train.txt              # Training, export & data-curation dependencies
+└── train.py                            # CRNN model training script
 ```
 
 ## Quick Start
@@ -95,8 +102,8 @@ python pipeline/6_find_noisy_labels.py
 
 # 2. Train CRNN & export weights to ONNX
 python train.py
-python export_onnx.py
-python export_detector_onnx.py
+python export/export_recognizer_onnx.py
+python export/export_detector_onnx.py
 ```
 ## Engineering Highlights & Problems Solved
 1. Eliminating Overlay Capture Feedback Loops: Because the detector inspects full-screen frames, a standard topmost overlay triggers infinite re-translation loops. Combining Windows WDA_EXCLUDEFROMCAPTURE with live bounding-box masking eliminates self-detection at both the OS compositor and frame-buffer levels.

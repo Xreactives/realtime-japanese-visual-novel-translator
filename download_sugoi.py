@@ -32,7 +32,7 @@ def main():
     if missing:
         print(
             "\n[Action Needed] Place your custom ONNX weights in weights/ "
-            "(download from GitHub Releases or export via export_onnx.py & export_detector_onnx.py):"
+            "(download from GitHub Releases or export via export_recognizer_onnx.py & export_detector_onnx.py):"
         )
         for m in missing:
             print(f"  - {m}")

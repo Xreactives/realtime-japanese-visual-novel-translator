@@ -5,8 +5,8 @@ import torch
 
 from model.crnn import CRNN
 
-WEIGHTS_PATH = Path("weights/crnn_vn_best.pt")
-ONNX_PATH = Path("weights/crnn_vn.onnx")
+WEIGHTS_PATH = Path("../weights/crnn_vn_best.pt")
+ONNX_PATH = Path("../weights/crnn_vn.onnx")
 
 
 def main():
