@@ -3,7 +3,7 @@
 An end-to-end, low-latency (~300–450 ms) offline Japanese-to-English screen translator built specifically for Visual Novels on Windows. Combines a custom **YOLO UI/text-line detector**, a custom **CRNN + CTC Japanese OCR model** exported to ONNX, domain-specific **SudachiPy NLP post-processing**, and **Sugoi V4 (CTranslate2)** running inside a self-excluding transparent overlay.
 
 ![Live Demo](assets/demo.gif)
-<sub>*Demo footage captured running on **Perennial Dusk -Kinsenka-**.*</sub>
+<sub>*Demo footage captured running on [**Perennial Dusk -Kinsenka-**](https://store.steampowered.com/app/3422740/).*</sub>
 ---
 
 ## System Architecture
