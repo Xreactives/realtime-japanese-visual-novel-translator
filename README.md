@@ -69,7 +69,7 @@ pip install -r requirements.txt
 ```bash
 python download_sugoi.py
 ```
-Download vn_detector.onnx and crnn_vn.onnx from the [suspicious link removed] page and place them inside weights/.
+Download `vn_detector.onnx` and `crnn_vn.onnx` from the [GitHub Releases](https://github.com/Xreactives/realtime-japanese-visual-novel-translator/releases) page and place them inside `weights/`.
 
 ### 3. Run the Translator
 ```bash
