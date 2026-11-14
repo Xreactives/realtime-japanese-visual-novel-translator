@@ -1,3 +1,16 @@
+# Environments & IDE
 .venv/
 .idea/
+__pycache__/
+*.py[cod]
+
+# Local datasets, fonts & debug dumps
 data/
+fonts/
+debug_runtime/
+runtime/line_segmenter.py
+# Model weights (downloaded via download_sugoi.py / GitHub Releases)
+weights/*
+!weights/.gitkeep
+
+*.mp4

@@ -1,11 +1,12 @@
-torch>=2.6.0
-transformers>=5.22.2
-accelerate>=1.15.0
-bitsandbytes>=0.50.2
-qwen-vl-utils>=0.0.14
-opencv-python>=5.0.0.93
-easyocr>=1.7.2
-pillow>=13.0.0
-ultralytics>=8.4.211
-numpy==2.5.4
-
+onnxruntime>=1.18.0
+ultralytics>=8.3.0
+ctranslate2>=4.3.0
+sentencepiece>=0.2.0
+sudachipy>=0.6.8
+sudachidict-core>=20240409
+opencv-python-headless>=4.9.0
+mss>=9.0.1
+numpy>=1.26.0
+huggingface-hub>=0.24.0
+nvidia-cublas-cu12; platform_system == "Windows" or platform_system == "Linux"
+nvidia-cuda-runtime-cu12; platform_system == "Windows" or platform_system == "Linux"

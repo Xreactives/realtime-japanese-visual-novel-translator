@@ -1,0 +1,9 @@
+-r requirements.txt
+torch>=2.5.0
+torchvision>=0.20.0
+pillow>=10.0.0
+onnx>=1.16.0
+easyocr>=1.7.0
+trdg>=1.8.0
+wikipedia>=1.4.0
+diffimg>=0.2.3

@@ -22,21 +22,9 @@ class DynamicSelfAttention(nn.Module):
         # x: (B, T, C)
         B, T, C = x.size()
 
-        q = (
-            self.q_proj(x)
-            .reshape(B, T, self.num_heads, self.head_dim)
-            .transpose(1, 2)
-        )
-        k = (
-            self.k_proj(x)
-            .reshape(B, T, self.num_heads, self.head_dim)
-            .transpose(1, 2)
-        )
-        v = (
-            self.v_proj(x)
-            .reshape(B, T, self.num_heads, self.head_dim)
-            .transpose(1, 2)
-        )
+        q = self.q_proj(x).reshape(B, T, self.num_heads, self.head_dim).transpose(1, 2)
+        k = self.k_proj(x).reshape(B, T, self.num_heads, self.head_dim).transpose(1, 2)
+        v = self.v_proj(x).reshape(B, T, self.num_heads, self.head_dim).transpose(1, 2)
 
         scores = torch.matmul(q, k.transpose(-2, -1)) / math.sqrt(self.head_dim)
         attn_weights = torch.softmax(scores, dim=-1)
@@ -49,11 +37,13 @@ class DynamicSelfAttention(nn.Module):
 
 
 class CRNN(nn.Module):
-
-    def __init__(self, input_height, num_classes):
+    def __init__(self, input_height: int = 32, num_classes: int = 3000):
         super().__init__()
+        if input_height != 32:
+            raise ValueError(f"This CRNN backbone expects input_height=32, got {input_height}")
+
         self.filter_size = 64
-        self.image_size = 1  # input_height // input_height
+        self.image_size = 1  # H=32 -> pool(2)->16 -> pool(2)->8 -> pool(2)->4 -> conv25(k=4)->1
         self.hidden_size = 256
         self.lstm_hidden = 256
         self.lstm_layer = 2
@@ -66,25 +56,17 @@ class CRNN(nn.Module):
         self.bn12 = nn.BatchNorm2d(self.filter_size)
 
         self.conv2 = nn.Conv2d(self.filter_size, self.filter_size * 2, 3, 1, 1)
-        self.conv22 = nn.Conv2d(
-            self.filter_size * 2, self.filter_size * 2, 3, 1, 1
-        )
+        self.conv22 = nn.Conv2d(self.filter_size * 2, self.filter_size * 2, 3, 1, 1)
         self.bn2 = nn.BatchNorm2d(self.filter_size * 2)
         self.bn22 = nn.BatchNorm2d(self.filter_size * 2)
 
-        self.conv23 = nn.Conv2d(
-            self.filter_size * 2, self.filter_size * 4, 3, 1, 1
-        )
+        self.conv23 = nn.Conv2d(self.filter_size * 2, self.filter_size * 4, 3, 1, 1)
         self.bn23 = nn.BatchNorm2d(self.filter_size * 4)
 
-        self.conv24 = nn.Conv2d(
-            self.filter_size * 4, self.filter_size * 4, 3, 1, 1
-        )
+        self.conv24 = nn.Conv2d(self.filter_size * 4, self.filter_size * 4, 3, 1, 1)
         self.bn24 = nn.BatchNorm2d(self.filter_size * 4)
 
-        self.conv25 = nn.Conv2d(
-            self.filter_size * 4, self.filter_size * 4, 4, 1, 0
-        )
+        self.conv25 = nn.Conv2d(self.filter_size * 4, self.filter_size * 4, 4, 1, 0)
         self.bn25 = nn.BatchNorm2d(self.filter_size * 4)
 
         self.relu = nn.ReLU(inplace=True)
@@ -128,8 +110,13 @@ class CRNN(nn.Module):
 
         self.fc2 = nn.Linear(self.lstm_hidden * 2, num_classes)
 
+    @staticmethod
+    def compute_seq_len(width: int) -> int:
+        """Exact time-step output length T for a given input image width."""
+        return max(1, (width // 8) - 3)
+
     def forward(self, x):
-        # --- CNN Feature Extraction ---
+        # x: (B, 3, 32, W)
         output = self.relu(self.bn1(self.conv1(x)))
         output = self.relu(self.bn12(self.conv12(output)))
         output = self.pool(output)
@@ -165,5 +152,5 @@ class CRNN(nn.Module):
 
         # --- Final Dense Projection ---
         output = output1 + attn_out + output2
-        output = self.fc2(output)
+        output = self.fc2(output)  # (B, T, num_classes)
         return output
